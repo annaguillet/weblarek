@@ -1,3 +1,4 @@
+import { IApi, IProduct, IBuyer, IPayment } from "../../types/index";
 type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export class Api {
@@ -35,3 +36,4 @@ export class Api {
         }).then(this.handleResponse<T>);
     }
 }
+
