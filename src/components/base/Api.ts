@@ -1,4 +1,3 @@
-import { IApi, IProduct, IBuyer, IPayment } from "../../types/index";
 type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export class Api {

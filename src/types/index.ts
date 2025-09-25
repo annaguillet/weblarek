@@ -23,3 +23,9 @@ export interface IProduct {
     price: number | null;
     category?: string;
 }
+
+export interface IOrderRequest {
+    buyer: IBuyer;
+    items: IProduct[];
+    total: number;
+  }

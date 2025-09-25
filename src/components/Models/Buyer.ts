@@ -1,4 +1,4 @@
-import type { IBuyer } from '../../../types/index';
+import type { IBuyer } from '../../types/index';
 
 export class Buyer {
   private payment: IBuyer['payment'] = 'card';

@@ -1,4 +1,4 @@
-import type { IProduct } from '../../../types/index';
+import type { IProduct } from '../../types/index';
 
 export class ProductCatalog {
   private catalog: IProduct[] = [];
