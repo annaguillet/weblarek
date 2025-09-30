@@ -1,64 +1,49 @@
 import './scss/styles.scss';
 
 import { ProductCatalog } from './components/Models/ProductCatalog';
-import { Basket } from './components/Models/Basket';
-import { Buyer } from './components/Models/Buyer';
 import { ProductsApi } from './components/Models/ProductsApi';
 import { Api } from './components/base/Api';
+import { Catalog } from './components/views/Catalog';
+import { ProductCard } from './components/views/ProductCard';
+import { EventEmitter, IEvents } from './components/base/Events';
 import { API_URL } from './utils/constants';
+import type { IProduct } from './types';
 
-import type { IBuyer } from './types';
+document.addEventListener('DOMContentLoaded', () => {
+  // --- 1. Контейнер галереи ---
+  const catalogContainer = document.querySelector('.gallery') as HTMLElement;
+  if (!catalogContainer) throw new Error('Контейнер .gallery не найден в DOM');
 
-// --- 1. Создаём экземпляры моделей данных ---
-const catalog = new ProductCatalog();
-const basket = new Basket();
-const buyer = new Buyer();
+  // --- 2. Объект событий ---
+  const events: IEvents = new EventEmitter();
 
-// --- 2. Создаём экземпляр API и ProductsApi ---
-const api = new Api(API_URL);
-const productsApi = new ProductsApi(api);
+  // --- 3. Модели и представления ---
+  const productCatalog = new ProductCatalog(events);
+  new Catalog(events, catalogContainer); // просто создаём экземпляр для подписки на события
 
-// --- 3. Работа с сервером через ProductsApi ---
-console.log('--- Запрос товаров с сервера ---');
+  const api = new Api(API_URL);
+  const productsApi = new ProductsApi(api);
 
-productsApi.fetchProducts()
-  .then(productsFromServer => {
-    console.log('Товары, полученные с сервера:', productsFromServer);
+  // --- 4. Подписка на событие обновления каталога ---
+  events.on<{ catalog: IProduct[] }>('catalog:updated', (data) => {
+    const products = data.catalog;
+    products.forEach((product) => {
+      new ProductCard(events, catalogContainer, {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        inBasket: false
+      });
+    });
+  });
 
-    // Сохраняем массив в модели ProductCatalog
-    catalog.setCatalog(productsFromServer);
-    console.log('Массив товаров из модели после сохранения:', catalog.getCatalog());
+  // --- 5. Запрос товаров с сервера ---
+  productsApi.fetchProducts()
+    .then((productsFromServer: IProduct[]) => {
+      productCatalog.setCatalog(productsFromServer); // вызовет 'catalog:updated'
+    })
+    .catch(err => console.error('Ошибка при получении товаров с сервера:', err));
+});
 
-    // Проверим выбор одного товара
-    const firstProduct = catalog.getProduct(productsFromServer[0].id);
-    catalog.setCardProduct(firstProduct!);
-    console.log('Выбранный товар:', catalog.getCardProduct());
 
-    // Тестируем корзину
-    basket.addInBasket(productsFromServer[0]);
-    basket.addInBasket(productsFromServer[1]);
-    console.log('Корзина после добавления:', basket.getBasket());
-    console.log('Количество товаров в корзине:', basket.getBasketCount());
-    console.log('Общая стоимость корзины:', basket.getBasketTotal());
-
-    basket.removeFromBasket(productsFromServer[0]);
-    console.log('Корзина после удаления:', basket.getBasket());
-    console.log('Есть ли товар с id первого продукта?', basket.hasInBasket(productsFromServer[0].id));
-
-    // Тестируем Buyer
-    const buyerData: IBuyer = {
-      payment: 'card',
-      address: 'ул. Какая-то, 12',
-      email: 'test@example.com',
-      phone: '+7 900 123-45-67',
-    };
-
-    buyer.setBuyerData(buyerData);
-    console.log('Данные покупателя:', buyer.getBuyerData());
-    console.log('Ошибки валидации:', buyer.validateBuyerData());
-
-    buyer.clearBuyerData();
-    console.log('Данные покупателя после очистки:', buyer.getBuyerData());
-  })
-  .catch(err => console.error('Ошибка при получении товаров с сервера:', err));
 

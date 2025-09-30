@@ -1,4 +1,5 @@
 import type { IBuyer } from '../../types/index';
+import type { IEvents } from '../base/Events';
 
 export class Buyer {
   private payment: IBuyer['payment'] = 'card';
@@ -6,11 +7,15 @@ export class Buyer {
   private email: string = '';
   private phone: string = '';
 
+  constructor(private events: IEvents) {}
+
   setBuyerData(data: Partial<IBuyer>): void {
     if (data.payment) this.payment = data.payment;
     if (data.address) this.address = data.address;
     if (data.email) this.email = data.email;
     if (data.phone) this.phone = data.phone;
+
+    this.events.emit('buyer:updated', { buyer: this.getBuyerData() });
   }
 
   getBuyerData(): IBuyer {
@@ -36,5 +41,6 @@ export class Buyer {
     this.address = '';
     this.email = '';
     this.phone = '';
+    this.events.emit('buyer:updated', { buyer: this.getBuyerData() });
   }
 }
