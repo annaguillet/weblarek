@@ -27,13 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 4. Подписка на событие обновления каталога ---
   events.on<{ catalog: IProduct[] }>('catalog:updated', (data) => {
     const products = data.catalog;
+  
+    const template = document.querySelector<HTMLTemplateElement>('#card-catalog');
+    if (!template) throw new Error('Шаблон #card-catalog не найден');
+  
     products.forEach((product) => {
-      new ProductCard(events, catalogContainer, {
+      const cardElement = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  
+      const card = new ProductCard(events, cardElement, {
         id: product.id,
         title: product.title,
         price: product.price,
         inBasket: false
       });
+  
+      catalogContainer.appendChild(cardElement);
     });
   });
 
