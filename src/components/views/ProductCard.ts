@@ -5,13 +5,14 @@ import { categoryMap, CDN_URL } from '../../utils/constants';
 
 type CategoryKey = keyof typeof categoryMap;
 
+
 export interface IProductCardData {
   id: string;
   title: string;
   price: number | null;
   inBasket: boolean;
   image: string;
-  category?: string; 
+  category?: string | undefined; 
 }
 
 export class ProductCard extends Component<{}> {
@@ -47,7 +48,7 @@ export class ProductCard extends Component<{}> {
     this.price = data.price;
     this.inBasket = data.inBasket;
     this.image = data.image;
-    this.category = data.category;
+    this.category = data.category as keyof typeof categoryMap;
 
 
     if (this.button) {

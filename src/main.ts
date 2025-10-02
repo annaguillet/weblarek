@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
   
     products.forEach((product) => {
       const cardElement = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      const categoryMapFromServer: Record<string, IProduct['category']> = {
+        'софт-скил': 'софт-скил',
+        'хард-скил': 'хард-скил',
+        'кнопка': 'кнопка',
+        'дополнительное': 'дополнительное',
+        'другое': 'другое',
+      };
+      
+      const categoryKey = product.category ? categoryMapFromServer[product.category] : undefined;
       
       new ProductCard(events, cardElement, {
         id: product.id,
@@ -40,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         price: product.price,
         inBasket: false,
         image: product.image,
-        
+        category:categoryKey,
       });
      
   
@@ -48,15 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  events.on('product:selected', ({ product }) => {
-    console.log('Товар выбран:', product);
-    // здесь можно открыть модальное окно товара
-  });
-
-  events.on('product:selected', ({ product }) => {
-    console.log('Товар выбран для просмотра:', product);
-    // тут можно открыть модалку с подробным описанием товара
-  });
 
   // --- 5. Запрос товаров с сервера ---
   productsApi.fetchProducts()

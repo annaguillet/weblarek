@@ -21,7 +21,7 @@ export interface IProduct {
     image: string;
     title: string;
     price: number | null;
-    category?: 'софт-скил' | 'хард-скил' | 'кнопка' | 'дополнительное' | 'другое';
+    category?: string | undefined;
 }
 
 export interface IOrderRequest {
