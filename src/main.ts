@@ -33,16 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
   
     products.forEach((product) => {
       const cardElement = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-  
-      const card = new ProductCard(events, cardElement, {
+      
+      new ProductCard(events, cardElement, {
         id: product.id,
         title: product.title,
         price: product.price,
-        inBasket: false
+        inBasket: false,
+        image: product.image,
+        
       });
+     
   
       catalogContainer.appendChild(cardElement);
     });
+  });
+
+  events.on('product:selected', ({ product }) => {
+    console.log('Товар выбран:', product);
+    // здесь можно открыть модальное окно товара
+  });
+
+  events.on('product:selected', ({ product }) => {
+    console.log('Товар выбран для просмотра:', product);
+    // тут можно открыть модалку с подробным описанием товара
   });
 
   // --- 5. Запрос товаров с сервера ---
