@@ -1,6 +1,8 @@
 import type { IProduct } from '../../types/index';
 import type { IEvents } from '../base/Events';
 
+
+
 export class ProductCatalog {
   private catalog: IProduct[] = [];
   private cardProduct: IProduct | null = null;

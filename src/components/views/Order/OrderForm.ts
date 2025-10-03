@@ -1,6 +1,6 @@
 import { FormBase } from './FormBase';
-import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
+import { IEvents } from '../../base/Events';
+import { ensureElement } from '../../../utils/utils';
 
 export class OrderForm extends FormBase<{ payment: string; address: string }> {
   protected paymentButtons: NodeListOf<HTMLButtonElement>;

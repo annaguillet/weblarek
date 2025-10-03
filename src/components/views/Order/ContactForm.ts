@@ -1,6 +1,6 @@
 import { FormBase } from './FormBase';
-import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
+import { IEvents } from '../../base/Events';
+import { ensureElement } from '../../../utils/utils';
 
 export class ContactForm extends FormBase<{ email: string; phone: string }> {
   protected emailInput: HTMLInputElement;

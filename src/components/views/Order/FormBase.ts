@@ -1,6 +1,6 @@
-import { Component } from '../base/Component';
-import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
+import { Component } from '../../base/Component';
+import { IEvents } from '../../base/Events';
+import { ensureElement } from '../../../utils/utils';
 
 export abstract class FormBase<T> extends Component<T> {
   protected submitButton: HTMLButtonElement;
