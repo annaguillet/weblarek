@@ -15,6 +15,8 @@ import { CartPreview } from './components/views/Card/CardPreview';
 import { BasketItem } from './components/views/Card/BasketItem';
 import { Modal } from './components/views/Order/Modal';
 import { OrderForm } from './components/views/Order/OrderForm';
+import { ContactForm } from './components/views/Order/ContactForm';
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,12 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------
   const events: IEvents = new EventEmitter();
   const basket = new Basket(events);
+  
 
   const catalogContainer = document.querySelector('.gallery') as HTMLElement;
   if (!catalogContainer) throw new Error('Контейнер .gallery не найден');
 
   const headerContainer = document.querySelector('.header') as HTMLElement;
   const header = new Header(events, headerContainer);
+  
 
   const productCatalog = new ProductCatalog(events);
 
@@ -37,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   new Catalog(events, catalogContainer);
 
-
+  const modalContainer = document.querySelector('#modal-container') as HTMLElement;
+const modal = new Modal(events, modalContainer);
   // --------------------------
   // Обновление счетчика корзины
   // --------------------------
@@ -119,15 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------
-  // Открытие корзины
+  // Открытие корзины и переход к форме заказа
   // --------------------------
   events.on('basket:open', () => {
-    const modal = document.querySelector('#modal-container') as HTMLElement;
-    const modalContent = modal.querySelector('.modal__content') as HTMLElement;
     const basketTemplate = document.querySelector<HTMLTemplateElement>('#basket');
     const itemTemplate = document.querySelector<HTMLTemplateElement>('#card-basket');
 
-    if (!basketTemplate || !itemTemplate || !modalContent) return;
+    if (!basketTemplate || !itemTemplate) return;
 
     const basketEl = basketTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
     const listEl = basketEl.querySelector('.basket__list') as HTMLElement;
@@ -146,14 +149,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     totalEl.textContent = `${basket.getBasketTotal()} синапсов`;
 
-    modalContent.innerHTML = '';
-    modalContent.appendChild(basketEl);
-    modal.classList.add('modal_active');
+    // Вставляем в модалку
+    modal.setContent(basketEl);
+    modal.show();
 
-    const closeBtn = modal.querySelector('.modal__close') as HTMLButtonElement;
-    closeBtn.onclick = () => modal.classList.remove('modal_active');
-    modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('modal_active'); };
+    // Обработка кнопки "Оформить"
+    const orderBtn = basketEl.querySelector('.basket__button') as HTMLButtonElement;
+    orderBtn.onclick = () => events.emit('order:start');
   });
+
+  // --------------------------
+  // Открытие формы заказа
+  // --------------------------
+  events.on('order:start', () => {
+    const orderTemplate = document.querySelector<HTMLTemplateElement>('#order');
+    if (!orderTemplate) return;
+
+    const orderEl = orderTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    modal.setContent(orderEl);
+
+    const orderForm = new OrderForm(events, orderEl);
+  });
+
+  // --------------------------
+// Переход на ContactForm при клике "Далее"
+// --------------------------
+events.on('order:next', (data) => {
+  // data = { payment, address }
+  const contactsTemplate = document.querySelector<HTMLTemplateElement>('#contacts');
+  if (!contactsTemplate) return;
+
+  const contactsEl = contactsTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  const contactForm = new ContactForm(events, contactsEl);
+
+  // Показываем следующую форму в той же модалке
+  modal.setContent(contactsEl);
+});
+
+// --------------------------
+// Обработка отправки контактов
+// --------------------------
+events.on('order:submit', (data) => {
+  console.log('Заказ отправлен', data);
+
+  const successTemplate = document.querySelector<HTMLTemplateElement>('#success');
+  if (!successTemplate) return;
+
+  const successEl = successTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+
+  // Кнопка закрытия успеха
+  const closeBtn = successEl.querySelector('.order-success__close') as HTMLButtonElement;
+  closeBtn.onclick = () => modal.hide();
+
+  modal.setContent(successEl);
+});
 
   // --------------------------
   // Загрузка товаров с сервера

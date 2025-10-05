@@ -10,7 +10,7 @@ export class Modal extends Component<{}> {
   constructor(protected events: IEvents, container: HTMLElement) {
     super(container);
 
-    this.containerElement = ensureElement<HTMLElement>('.modal', container);
+    this.containerElement = container; // <--- используем сам контейнер
     this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', container);
     this.contentElement = ensureElement<HTMLElement>('.modal__content', container);
 
