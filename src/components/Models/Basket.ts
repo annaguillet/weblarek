@@ -1,5 +1,5 @@
-import type { IProduct } from '../../types/index';
-import type { IEvents } from '../base/Events';
+import type { IProduct } from "../../types/index";
+import type { IEvents } from "../base/Events";
 
 export class Basket {
   private items: IProduct[] = [];
@@ -8,18 +8,13 @@ export class Basket {
 
   addInBasket(product: IProduct): void {
     this.items.push(product);
-    this.events.emit('basket:changed', { items: this.items });
+    this.events.emit("basket:changed", { items: this.items });
   }
 
   removeFromBasket(product: { id: string }): void {
-    console.log('Removing product:', product.id); // Отладочная информация
-  console.log('Before removal:', this.items.map(item => item.id)); // Отладочная информация
-  
-    this.items = this.items.filter(item => item.id !== product.id);
+    this.items = this.items.filter((item) => item.id !== product.id);
 
-
-  console.log('After removal:', this.items.map(item => item.id)); // Отладочная информация
-    this.events.emit('basket:changed', { items: this.items });
+    this.events.emit("basket:changed", { items: this.items });
   }
 
   getBasketCount(): number {
@@ -35,12 +30,11 @@ export class Basket {
   }
 
   hasInBasket(id: string): boolean {
-    return this.items.some(item => item.id === id);
+    return this.items.some((item) => item.id === id);
   }
 
   clearBasket(): void {
     this.items = [];
-    this.events.emit('basket:changed', { items: this.items });
+    this.events.emit("basket:changed", { items: this.items });
   }
 }
-
