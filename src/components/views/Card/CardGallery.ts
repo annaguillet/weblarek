@@ -73,6 +73,11 @@ export class ProductCard extends Component<{}> {
   }
 
   // Сеттер и геттер для заголовка
+
+  get title(): string {
+    return this._title;
+  }
+  
   set title(value: string) {
     this._title = value;
     this.titleElement.textContent = value;
