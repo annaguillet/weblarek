@@ -1,4 +1,4 @@
-import type { IProduct } from "../../types/index";
+import type { IProduct } from "../../types";
 import type { IEvents } from "../base/Events";
 
 export class Basket {
@@ -8,13 +8,10 @@ export class Basket {
 
   addInBasket(product: IProduct): void {
     this.items.push(product);
-    this.events.emit("basket:changed", { items: this.items });
   }
 
   removeFromBasket(product: { id: string }): void {
     this.items = this.items.filter((item) => item.id !== product.id);
-
-    this.events.emit("basket:changed", { items: this.items });
   }
 
   getBasketCount(): number {
@@ -35,6 +32,5 @@ export class Basket {
 
   clearBasket(): void {
     this.items = [];
-    this.events.emit("basket:changed", { items: this.items });
   }
 }

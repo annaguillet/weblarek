@@ -1,6 +1,5 @@
 import { ensureElement } from "../../../utils/utils";
 import { Component } from "../../base/Component";
-import { IEvents } from "../../base/Events";
 import { categoryMap, CDN_URL } from "../../../utils/constants";
 
 type CategoryKey = keyof typeof categoryMap;
@@ -16,6 +15,7 @@ export interface IProductCardData {
 
 export interface ICardActions {
   onClick?: () => void;
+  onAddToBasket?: (id: string, inBasket: boolean) => void; // новый callback
 }
 
 export class ProductCard extends Component<{}> {
@@ -31,7 +31,6 @@ export class ProductCard extends Component<{}> {
   private _inBasket: boolean;
 
   constructor(
-    protected events: IEvents,
     container: HTMLElement,
     data: IProductCardData,
     actions?: ICardActions
@@ -43,41 +42,27 @@ export class ProductCard extends Component<{}> {
     this._price = data.price;
     this._inBasket = data.inBasket;
 
-    this.titleElement = ensureElement<HTMLElement>(
-      ".card__title",
-      this.container
-    );
-    this.priceElement = ensureElement<HTMLElement>(
-      ".card__price",
-      this.container
-    );
-    this.button =
-      this.container.querySelector<HTMLButtonElement>(".card__button") ||
-      undefined;
-    this.imageElement = ensureElement<HTMLImageElement>(
-      ".card__image",
-      this.container
-    );
-    this.categoryElement = ensureElement<HTMLElement>(
-      ".card__category",
-      this.container
-    );
+    this.titleElement = ensureElement<HTMLElement>(".card__title", this.container);
+    this.priceElement = ensureElement<HTMLElement>(".card__price", this.container);
+    this.button = this.container.querySelector<HTMLButtonElement>(".card__button") || undefined;
+    this.imageElement = ensureElement<HTMLImageElement>(".card__image", this.container);
+    this.categoryElement = ensureElement<HTMLElement>(".card__category", this.container);
 
     this.title = data.title;
     this.price = data.price;
     this.inBasket = data.inBasket;
     this.image = data.image;
-    this.category = data.category as keyof typeof categoryMap;
+    this.category = data.category;
 
     if (this.button) {
       this.button.addEventListener("click", () => {
-        if (this._inBasket) {
-          this.events.emit("basket:remove", { id: this._id });
-        } else {
-          this.events.emit("basket:add", { id: this._id });
-        }
         this._inBasket = !this._inBasket;
         this.inBasket = this._inBasket;
+
+        // теперь вместо this.events.emit вызываем callback
+        if (actions?.onAddToBasket) {
+          actions.onAddToBasket(this._id, this._inBasket);
+        }
       });
     }
 
@@ -85,8 +70,6 @@ export class ProductCard extends Component<{}> {
       this.container.addEventListener("click", actions.onClick);
     }
   }
-
-  // Сеттер и геттер для заголовка
 
   get title(): string {
     return this._title;
@@ -98,10 +81,8 @@ export class ProductCard extends Component<{}> {
     if (this.imageElement) this.imageElement.alt = value;
   }
 
-  // Сеттер и геттер для цены
   set price(value: number | null) {
     this._price = value;
-
     if (value === null) {
       this.priceElement.textContent = "Недоступно";
       if (this.button) this.button.disabled = true;
@@ -109,14 +90,11 @@ export class ProductCard extends Component<{}> {
       this.priceElement.textContent = `${value} синапсов`;
       if (this.button) {
         this.button.disabled = false;
-        this.button.textContent = this._inBasket
-          ? "Удалить из корзины"
-          : "В корзину";
+        this.button.textContent = this._inBasket ? "Удалить из корзины" : "В корзину";
       }
     }
   }
 
-  // Сеттер и геттер для состояния в корзине
   set inBasket(value: boolean) {
     this._inBasket = value;
     if (this.button && this._price !== null) {
@@ -124,7 +102,6 @@ export class ProductCard extends Component<{}> {
     }
   }
 
-  // Сеттер и геттер для изображения
   protected setImage(el: HTMLImageElement, src: string, alt: string) {
     el.src = src ? `${CDN_URL}/${src}` : "/images/placeholder.png";
     el.alt = alt;
@@ -134,12 +111,11 @@ export class ProductCard extends Component<{}> {
     this.setImage(this.imageElement, value, this.title);
   }
 
-  // Сеттер и геттер для категории
   set category(value: CategoryKey | undefined) {
     if (!value || !this.categoryElement) return;
 
     this.categoryElement.textContent = value;
-    this.categoryElement.className = "card__category"; // сброс классов
+    this.categoryElement.className = "card__category";
 
     const modifier = categoryMap[value];
     if (modifier) {

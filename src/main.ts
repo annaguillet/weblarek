@@ -9,69 +9,60 @@ import { API_URL, categoryMap } from "./utils/constants";
 import type { IProduct } from "./types";
 import { Basket } from "./components/Models/Basket";
 import { Header } from "./components/views/HeaderViews";
+import { Buyer } from "./components/Models/Buyer";
 import { CartPreview } from "./components/views/Card/CardPreview";
 import { BasketItem } from "./components/views/Card/BasketItem";
 import { Modal } from "./components/views/Order/Modal";
 import { OrderForm } from "./components/views/Order/OrderForm";
 import { ContactForm } from "./components/views/Order/ContactForm";
 import { Success } from "./components/views/Order/Success";
+import type { IBuyer } from "../src/types/index";
 
 document.addEventListener("DOMContentLoaded", () => {
   // --------------------------
-  // Основные объекты
+  // СЛОЙ ПРЕЗЕНТЕРА: Создание основных экземпляров
   // --------------------------
   const events: IEvents = new EventEmitter();
   const basket = new Basket(events);
-
-  const catalogContainer = document.querySelector(".gallery") as HTMLElement;
-  if (!catalogContainer) throw new Error("Контейнер .gallery не найден");
-
-  const headerContainer = document.querySelector(".header") as HTMLElement;
-  const header = new Header(events, headerContainer);
-
   const productCatalog = new ProductCatalog(events);
   const api = new Api(API_URL);
   const productsApi = new ProductsApi(api);
 
-  const modalContainer = document.querySelector(
-    "#modal-container"
-  ) as HTMLElement;
+  const catalogContainer = document.querySelector(".gallery") as HTMLElement;
+  const headerContainer = document.querySelector(".header") as HTMLElement;
+  const modalContainer = document.querySelector("#modal-container") as HTMLElement;
+  const buyer = new Buyer();
+
+
+  if (!catalogContainer) throw new Error("Контейнер .gallery не найден");
+  if (!headerContainer) throw new Error("Контейнер .header не найден");
+  if (!modalContainer) throw new Error("Контейнер #modal-container не найден");
+
+  const header = new Header(events, headerContainer);
   const modal = new Modal(events, modalContainer);
 
   // --------------------------
-  // Компонент успеха
+  // 1. Обновление счётчика корзины
   // --------------------------
-  const successTemplate =
-    document.querySelector<HTMLTemplateElement>("#success");
-  if (!successTemplate) throw new Error("Шаблон #success не найден");
+  function updateBasketCounter() {
+    header.counter = basket.getBasket().length;
+  }
 
   // --------------------------
-  // Обновление счетчика корзины
+  // 2. Рендер каталога
   // --------------------------
-  events.on<{ items: IProduct[] }>("basket:changed", ({ items }) => {
-    header.counter = items.length;
-  });
-
-  // --------------------------
-  // Обновление каталога
-  // --------------------------
-  events.on<{ catalog: IProduct[] }>("catalog:updated", ({ catalog }) => {
-    const template =
-      document.querySelector<HTMLTemplateElement>("#card-catalog");
+  function renderCatalog(products: IProduct[]) {
+    const template = document.querySelector<HTMLTemplateElement>("#card-catalog");
     if (!template) throw new Error("Шаблон #card-catalog не найден");
-
+  
     catalogContainer.innerHTML = "";
-
-    catalog.forEach((product) => {
-      const cardElement = template.content.firstElementChild!.cloneNode(
-        true
-      ) as HTMLElement;
-      const categoryKey = product.category?.toLowerCase() as
-        | keyof typeof categoryMap
-        | undefined;
-
+  
+    products.forEach((product) => {
+      const cardElement = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  
+      const categoryKey = product.category?.toLowerCase() as keyof typeof categoryMap | undefined;
+  
       new ProductCard(
-        events,
         cardElement,
         {
           id: product.id,
@@ -83,26 +74,34 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
           onClick: () => events.emit("product:selected", { product }),
+          onAddToBasket: (id, inBasket) => {
+            // Обновляем корзину через презентер
+            if (inBasket) {
+              const p = productCatalog.getProduct(id);
+              if (p) basket.addInBasket(p);
+            } else {
+              basket.removeFromBasket({ id });
+            }
+  
+            // обновляем счетчик и рендерим элементы при необходимости
+            updateBasketCounter();
+          }
         }
       );
-
+  
       catalogContainer.appendChild(cardElement);
     });
-  });
+  }
+  
 
   // --------------------------
-  // Превью товара
+  // 3. Превью карточки товара
   // --------------------------
-  events.on<{ product: IProduct }>("product:selected", ({ product }) => {
-    const template =
-      document.querySelector<HTMLTemplateElement>("#card-preview");
+  function showProductPreview(product: IProduct) {
+    const template = document.querySelector<HTMLTemplateElement>("#card-preview");
     if (!template) return;
 
-    const previewEl = template.content.firstElementChild!.cloneNode(
-      true
-    ) as HTMLElement;
-    modal.setContent(previewEl);
-    modal.show();
+    const previewEl = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
 
     new CartPreview(events, previewEl, {
       id: product.id,
@@ -111,48 +110,29 @@ document.addEventListener("DOMContentLoaded", () => {
       price: product.price,
       inBasket: basket.hasInBasket(product.id),
       image: product.image,
-      category: product.category?.toLowerCase() as
-        | keyof typeof categoryMap
-        | undefined,
+      category: product.category?.toLowerCase() as keyof typeof categoryMap | undefined,
     });
-  });
+
+    modal.setContent(previewEl);
+    modal.show();
+  }
 
   // --------------------------
-  // Добавление / удаление из корзины
-  // --------------------------
-  events.on<{ id: string }>("basket:add", ({ id }) => {
-    const product = productCatalog.getProduct(id);
-    if (product) basket.addInBasket(product);
-  });
-
-  events.on<{ id: string }>("basket:remove", ({ id }) => {
-    const product = productCatalog.getProduct(id);
-    if (product) basket.removeFromBasket(product);
-  });
-
-  // --------------------------
-  // Рендер корзины
+  // 4. Рендер корзины
   // --------------------------
   function renderBasket() {
-    const basketTemplate =
-      document.querySelector<HTMLTemplateElement>("#basket");
-    const itemTemplate =
-      document.querySelector<HTMLTemplateElement>("#card-basket")!;
+    const basketTemplate = document.querySelector<HTMLTemplateElement>("#basket");
+    const itemTemplate = document.querySelector<HTMLTemplateElement>("#card-basket");
     if (!basketTemplate || !itemTemplate) return;
 
-    const basketEl = basketTemplate.content.firstElementChild!.cloneNode(
-      true
-    ) as HTMLElement;
+    const basketEl = basketTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
     const listEl = basketEl.querySelector(".basket__list") as HTMLElement;
     const totalEl = basketEl.querySelector(".basket__price") as HTMLElement;
 
-    function renderBasketContents() {
+    const renderItems = () => {
       listEl.innerHTML = "";
       basket.getBasket().forEach((product, index) => {
-        const itemEl = itemTemplate.content.firstElementChild!.cloneNode(
-          true
-        ) as HTMLElement;
-
+        const itemEl = itemTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
         itemEl.dataset.id = product.id;
 
         new BasketItem(events, itemEl, {
@@ -164,104 +144,135 @@ document.addEventListener("DOMContentLoaded", () => {
 
         listEl.appendChild(itemEl);
       });
-
       totalEl.textContent = `${basket.getBasketTotal()} синапсов`;
-    }
+    };
 
-    renderBasketContents();
+    renderItems();
 
     listEl.addEventListener("click", (e) => {
       const btn = (e.target as HTMLElement).closest(".basket__item-delete");
-      if (!btn) return;
-      const li = (btn as HTMLElement).closest(
-        ".basket__item"
-      ) as HTMLElement | null;
-      const id = li?.dataset.id;
-      if (id) {
-        events.emit("basket:remove", { id });
+      if (btn) {
+        const li = (btn as HTMLElement).closest(".basket__item") as HTMLElement | null;
+        const id = li?.dataset.id;
+        if (id) {
+          basket.removeFromBasket({ id });
+          renderItems();
+          updateBasketCounter();
+        }
       }
     });
 
-    events.on("basket:changed", () => {
-      renderBasketContents();
-    });
-
-    const orderBtn = basketEl.querySelector(
-      ".basket__button"
-    ) as HTMLButtonElement;
+    const orderBtn = basketEl.querySelector(".basket__button") as HTMLButtonElement;
     orderBtn.onclick = () => events.emit("order:start");
 
     modal.setContent(basketEl);
     modal.show();
   }
 
-  events.on("basket:open", renderBasket);
+  // --------------------------
+  // 5. Форма заказа
+  // --------------------------
 
-  // --------------------------
-  // Этап 1: форма доставки
-  // --------------------------
-  events.on("order:start", () => {
+
+  function updateBuyerData(data: Partial< IBuyer>) {
+    buyer.setBuyerData(data);
+    events.emit("buyer:updated", { buyer: buyer.getBuyerData() });
+  }
+  
+  
+  function validateBuyerData() {
+    return buyer.validateBuyerData();
+  }
+
+  events.on("contact:submit", ({ formData }: { formData: Partial<IBuyer> }) => {
+    updateBuyerData(formData);
+  
+    const errors = validateBuyerData();
+    if (Object.keys(errors).length > 0) {
+      events.emit("contact:errors", { errors });
+      return;
+    }
+  
+    events.emit("order:submit"); // если всё ок — продолжаем оформление
+  });  
+  
+  function renderOrderForm() {
     const orderTemplate = document.querySelector<HTMLTemplateElement>("#order");
     if (!orderTemplate) return;
-    const orderEl = orderTemplate.content.firstElementChild!.cloneNode(
-      true
-    ) as HTMLElement;
 
-    // создаём форму и передаём basket
+    const orderEl = orderTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
     new OrderForm(events, orderEl);
-
     modal.setContent(orderEl);
-  });
+  }
 
-  // --------------------------
-  // Этап 2: контактная форма
-  // --------------------------
-  events.on("order:next", () => {
-    const contactsTemplate =
-      document.querySelector<HTMLTemplateElement>("#contacts");
+  function renderContactForm() {
+    const contactsTemplate = document.querySelector<HTMLTemplateElement>("#contacts");
     if (!contactsTemplate) return;
-    const contactsEl = contactsTemplate.content.firstElementChild!.cloneNode(
-      true
-    ) as HTMLElement;
+
+    const contactsEl = contactsTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
     new ContactForm(events, contactsEl);
     modal.setContent(contactsEl);
-  });
+  }
+
+  function renderSuccessScreen(total: number) {
+    const successTemplate = document.querySelector<HTMLTemplateElement>("#success");
+    if (!successTemplate) return;
+
+    const successEl = successTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    const successComponent = new Success(successEl, events);
+    successComponent.render({ total });
+    modal.setContent(successEl);
+    modal.show();
+  }
 
   // --------------------------
-  // Этап 3: успех
+  // 6. События приложения
   // --------------------------
+  events.on("catalog:updated", ({ catalog }: { catalog: IProduct[] }) => {
+    renderCatalog(catalog);
+  });
+
+  events.on("basket:open", () => renderBasket());
+
+  events.on("product:selected", ({ product }: { product: IProduct }) => {
+    showProductPreview(product);
+  });
+
+  events.on("basket:add", ({ id }: { id: string }) => {
+    const product = productCatalog.getProduct(id);
+    if (product) {
+      basket.addInBasket(product);
+      updateBasketCounter();
+    }
+  });
+
+  events.on("basket:remove", ({ id }: { id: string }) => {
+    basket.removeFromBasket({ id }); 
+    updateBasketCounter();
+  });
+
+  events.on("order:start", renderOrderForm);
+  events.on("order:next", renderContactForm);
+
   events.on("order:submit", () => {
     const total = basket.getBasketTotal();
     basket.clearBasket();
-
-    const successTemplate =
-      document.querySelector<HTMLTemplateElement>("#success");
-    if (!successTemplate) return;
-
-    const successEl = successTemplate.content.firstElementChild!.cloneNode(
-      true
-    ) as HTMLElement;
-
-    modal.setContent(successEl);
-    modal.show();
-
-    const successComponent = new Success(successEl, events);
-
-    successComponent.render({ total });
+    updateBasketCounter();
+    renderSuccessScreen(total);
   });
 
   events.on("success:close", () => {
     modal.hide();
-    events.emit("catalog:show");
   });
 
   // --------------------------
-  // Загрузка товаров с сервера
+  // 7. Загрузка данных с сервера
   // --------------------------
   productsApi
     .fetchProducts()
-    .then((products) => productCatalog.setCatalog(products))
-    .catch((err) =>
-      console.error("Ошибка при получении товаров с сервера:", err)
-    );
+    .then((products) => {
+      productCatalog.setCatalog(products);
+      events.emit("catalog:updated", { catalog: products });
+    })
+    .catch((err) => console.error("Ошибка при получении товаров:", err));
 });
