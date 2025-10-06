@@ -1,13 +1,15 @@
+
 import { FormBase } from './FormBase';
 import { IEvents } from '../../base/Events';
 import { ensureElement } from '../../../utils/utils';
+import type { Basket } from '../../Models/Basket';
 
 export class OrderForm extends FormBase<{ payment: string; address: string }> {
   protected paymentButtons: NodeListOf<HTMLButtonElement>;
   protected addressInput: HTMLInputElement;
   protected selectedPayment: string | null = null;
 
-  constructor(events: IEvents, container: HTMLElement) {
+  constructor(events: IEvents, container: HTMLElement, private basket: Basket) {
     super(events, container);
 
     this.paymentButtons = container.querySelectorAll<HTMLButtonElement>('.order__buttons button');
@@ -29,7 +31,12 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
     this.container.addEventListener('submit', (e) => {
       e.preventDefault();
       if (this.validate()) {
-        this.events.emit('order:next', { payment: this.selectedPayment, address: this.addressInput.value });
+        const total = this.basket.getBasketTotal(); // ✅ получаем сумму
+        this.events.emit('order:next', { 
+          payment: this.selectedPayment, 
+          address: this.addressInput.value,
+          total 
+        });
       }
     });
   }

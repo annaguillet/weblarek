@@ -11,8 +11,14 @@ export class Basket {
     this.events.emit('basket:changed', { items: this.items });
   }
 
-  removeFromBasket(product: IProduct): void {
+  removeFromBasket(product: { id: string }): void {
+    console.log('Removing product:', product.id); // Отладочная информация
+  console.log('Before removal:', this.items.map(item => item.id)); // Отладочная информация
+  
     this.items = this.items.filter(item => item.id !== product.id);
+
+
+  console.log('After removal:', this.items.map(item => item.id)); // Отладочная информация
     this.events.emit('basket:changed', { items: this.items });
   }
 
@@ -37,3 +43,4 @@ export class Basket {
     this.events.emit('basket:changed', { items: this.items });
   }
 }
+
