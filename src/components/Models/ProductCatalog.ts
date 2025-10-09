@@ -1,5 +1,7 @@
-import type { IProduct } from "../../types/index";
-import type { IEvents } from "../base/Events";
+import type { IProduct } from '../../types/index';
+import type { IEvents } from '../base/Events';
+
+
 
 export class ProductCatalog {
   private catalog: IProduct[] = [];
@@ -7,24 +9,28 @@ export class ProductCatalog {
 
   constructor(private events: IEvents) {}
 
-  setCatalog(items: IProduct[]): void {
-    this.catalog = items;
-  }
+setCatalog(products: IProduct[]) {
+  this.catalog = products;
+  this.events.emit('catalog:updated', { catalog: products });
+}
 
   getCatalog(): IProduct[] {
     return this.catalog;
   }
 
   getProduct(id: string): IProduct | null {
-    return this.catalog.find((item) => item.id === id) || null;
+    return this.catalog.find(item => item.id === id) || null;
   }
 
   setCardProduct(item: IProduct): void {
     this.cardProduct = item;
+    this.events.emit('product:selected', { product: this.cardProduct });
   }
 
   getCardProduct(): IProduct | null {
     return this.cardProduct;
   }
 }
+
+
 

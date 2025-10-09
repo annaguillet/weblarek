@@ -29,7 +29,11 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
     this.container.addEventListener('submit', (e) => {
       e.preventDefault();
       if (this.validate()) {
-        this.events.emit('order:next', { payment: this.selectedPayment, address: this.addressInput.value });
+
+        this.events.emit('order:next', { 
+          payment: this.selectedPayment, 
+          address: this.addressInput.value
+        });
       }
     });
   }

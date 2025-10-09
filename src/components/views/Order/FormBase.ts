@@ -1,6 +1,6 @@
-import { Component } from "../../base/Component";
-import { IEvents } from "../../base/Events";
-import { ensureElement } from "../../../utils/utils";
+import { Component } from '../../base/Component';
+import { IEvents } from '../../base/Events';
+import { ensureElement } from '../../../utils/utils';
 
 export abstract class FormBase<T> extends Component<T> {
   protected submitButton: HTMLButtonElement;
@@ -9,11 +9,8 @@ export abstract class FormBase<T> extends Component<T> {
   constructor(protected events: IEvents, container: HTMLElement) {
     super(container);
 
-    this.submitButton = ensureElement<HTMLButtonElement>(
-      'button[type="submit"]',
-      container
-    );
-    this.errorElement = ensureElement<HTMLElement>(".form__errors", container);
+    this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', container);
+    this.errorElement = ensureElement<HTMLElement>('.form__errors', container);
   }
 
   abstract validate(): boolean;
@@ -23,6 +20,6 @@ export abstract class FormBase<T> extends Component<T> {
   }
 
   clearError() {
-    this.errorElement.textContent = "";
+    this.errorElement.textContent = '';
   }
 }

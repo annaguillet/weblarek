@@ -9,10 +9,12 @@ export interface IApi {
   ): Promise<T>;
 }
 
-export type IPayment = "cash" | "card" | "";
+export type TPayment = "cash" | "card" | "";
+
+export type TCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
 
 export interface IBuyer {
-  payment: IPayment;
+  payment: TPayment;
   email: string;
   phone: string;
   address: string;
@@ -24,11 +26,42 @@ export interface IProduct {
   image: string;
   title: string;
   price: number | null;
-  category?: string | undefined;
+  category?: TCategory;
 }
 
-export interface IOrderRequest {
+export interface IOrderRequest extends IBuyer {
   buyer: IBuyer;
   items: IProduct[];
   total: number;
+}
+
+export interface IOrderResult {
+    id: string;
+    total: number;
+}
+
+export interface IProductCatalogResult {
+    total: number;
+    items: IProduct[];
+}
+
+
+export interface ICardClick {
+    onClick?: (event: MouseEvent) => void;
+}
+
+export interface ICardBasketClick {
+    onRemove?: (event: MouseEvent) => void;
+}
+
+export interface IBasketEvent {
+    onOrder?: () => void;
+}
+
+export interface IFormEvent {
+    onSubmit?: (event: Event) => void;
+}
+
+export interface ISuccessEvent {
+    onClose?: () => void;
 }

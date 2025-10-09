@@ -1,6 +1,6 @@
-import { ensureElement } from "../../../utils/utils";
-import { Component } from "../../base/Component";
-import { IEvents } from "../../base/Events";
+import { ensureElement } from '../../../utils/utils';
+import { Component } from '../../base/Component';
+import { IEvents } from '../../base/Events';
 
 export interface IBasketItemData {
   id: string;
@@ -20,11 +20,7 @@ export class BasketItem extends Component<{}> {
   private _price: number;
   private _index: number;
 
-  constructor(
-    protected events: IEvents,
-    container: HTMLElement,
-    data: IBasketItemData
-  ) {
+  constructor(protected events: IEvents, container: HTMLElement, data: IBasketItemData) {
     super(container);
 
     this._id = data.id;
@@ -32,29 +28,20 @@ export class BasketItem extends Component<{}> {
     this._price = data.price;
     this._index = data.index;
 
-    this.indexElement = ensureElement<HTMLElement>(
-      ".basket__item-index",
-      this.container
-    );
-    this.titleElement = ensureElement<HTMLElement>(
-      ".card__title",
-      this.container
-    );
-    this.priceElement = ensureElement<HTMLElement>(
-      ".card__price",
-      this.container
-    );
-    this.removeButton = ensureElement<HTMLButtonElement>(
-      ".basket__item-delete",
-      this.container
-    );
+    // Получаем элементы из контейнера
+    this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
+    this.titleElement = ensureElement<HTMLElement>('.card__title', this.container);
+    this.priceElement = ensureElement<HTMLElement>('.card__price', this.container);
+    this.removeButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
+    // Подставляем значения
     this.index = this._index;
     this.title = this._title;
     this.price = this._price;
 
-    this.removeButton.addEventListener("click", () => {
-      this.events.emit("basket:remove", { id: this._id });
+    // Обработчик удаления
+    this.removeButton.addEventListener('click', () => {
+      this.events.emit('basket:remove', { id: this._id });
     });
   }
 

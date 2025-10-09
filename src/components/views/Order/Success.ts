@@ -1,8 +1,7 @@
-import { Component } from "../../base/Component";
-import { IEvents } from "../../base/Events";
-import { ensureElement } from "../../../utils/utils";
+import { Component } from '../../base/Component';
+import { ensureElement } from '../../../utils/utils';
 
-export interface ISuccessData {
+interface ISuccessData {
   total: number;
 }
 
@@ -10,26 +9,18 @@ export class Success extends Component<ISuccessData> {
   protected description: HTMLElement;
   protected closeButton: HTMLButtonElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, private events?: any) {
     super(container);
 
-    this.description = ensureElement<HTMLElement>(
-      ".order-success__description",
-      container
-    );
-    this.closeButton = ensureElement<HTMLButtonElement>(
-      ".order-success__close",
-      container
-    );
+    this.description = ensureElement<HTMLElement>('.order-success__description', this.container);
+    this.closeButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
 
-    this.closeButton.addEventListener("click", () => {
-      this.events.emit("success:close");
+    this.closeButton.addEventListener('click', () => {
+      this.events?.emit('success:close');
     });
   }
 
-  render(data?: Partial<ISuccessData>): HTMLElement {
-    const total = data?.total ?? 0;
-    this.description.textContent = `Списано ${total} синапсов`;
-    return this.container;
+  set total(value: number) {
+    this.description.textContent = `Списано ${value} синапсов`;
   }
 }
