@@ -47,7 +47,7 @@ export class ProductCard extends Component<{}> {
     this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
     this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
 
-    // Используем сеттер, чтобы сразу установить src и alt
+
     this.title = data.title;
     this.price = data.price;
     this.inBasket = data.inBasket;

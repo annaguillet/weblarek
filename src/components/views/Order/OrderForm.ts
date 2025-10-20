@@ -19,7 +19,7 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
         this.paymentButtons.forEach(b => b.classList.remove('button_alt-active'));
         btn.classList.add('button_alt-active');
     
-        // 🔹 emit change event
+
         this.events.emit('order:change', { payment: this.selectedPayment });
     
         this.submitButton.disabled = !this.validate();
@@ -27,7 +27,6 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
     });
     
     this.addressInput.addEventListener('input', () => {
-      // 🔹 emit change event
       this.events.emit('order:change', { address: this.addressInput.value });
     
       this.submitButton.disabled = !this.validate();

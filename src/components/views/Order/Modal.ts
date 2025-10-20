@@ -14,15 +14,15 @@ export class Modal extends Component<{ content: HTMLElement }> {
     this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', container);
     this.contentElement = ensureElement<HTMLElement>('.modal__content', container);
 
-    // Закрытие по кнопке
+
     this.closeButton.addEventListener('click', () => this.hide());
 
-    // Закрытие по клику вне контента
+
     this.containerElement.addEventListener('click', (e) => {
       if (e.target === this.containerElement) this.hide();
     });
 
-    // Изначально модалка скрыта и не перехватывает клики
+
     this.containerElement.style.display = 'none';
     this.containerElement.style.pointerEvents = 'none';
   }

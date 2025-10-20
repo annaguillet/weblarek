@@ -2,12 +2,8 @@ import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
 import { BasketItem } from './Card/BasketItem';
-import type { IProduct } from '../../types';
 import { Basket } from '../Models/Basket';
 
-interface IBasketView {
-	basket: Basket;
-}
 
 export class BasketView extends Component<{ basket: Basket }> {
   protected basketTitle: HTMLElement;
@@ -18,14 +14,14 @@ export class BasketView extends Component<{ basket: Basket }> {
   constructor(protected events: IEvents, container: HTMLElement, protected basket: Basket) {
     super(container);
 
-    this.basketTitle = ensureElement<HTMLElement>('.modal__title', container); // в шаблоне корзины заголовок .modal__title
+    this.basketTitle = ensureElement<HTMLElement>('.modal__title', container); 
     this.basketList = ensureElement<HTMLElement>('.basket__list', container);
     this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', container);
     this.basketPrice = ensureElement<HTMLElement>('.basket__price', container);
 
     this.basketButton.addEventListener('click', () => this.events.emit('order:start'));
 
-    // Один раз навешиваем делегирование удаления
+
     this.basketList.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('.basket__item-delete');
       if (!btn) return;
@@ -34,7 +30,7 @@ export class BasketView extends Component<{ basket: Basket }> {
       if (id) this.events.emit('basket:remove', { id });
     });
 
-    // Подписка на изменение корзины
+
     this.events.on('basket:changed', () => this.render());
   }
 
