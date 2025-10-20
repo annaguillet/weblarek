@@ -1,55 +1,69 @@
-import { IBasketEvent } from "../../types/index";
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
+import { Component } from '../base/Component';
+import { IEvents } from '../base/Events';
+import { ensureElement } from '../../utils/utils';
+import { BasketItem } from './Card/BasketItem';
+import type { IProduct } from '../../types';
+import { Basket } from '../Models/Basket';
 
 interface IBasketView {
-    items: HTMLElement[];
-    total: number;
-};
+	basket: Basket;
+}
 
-export class BasketView extends Component<IBasketView> {
-    protected basketTitle: HTMLElement;
-    protected basketList: HTMLElement;
-    protected basketButton: HTMLButtonElement;
-    protected basketPrice: HTMLElement;
+export class BasketView extends Component<{ basket: Basket }> {
+  protected basketTitle: HTMLElement;
+  protected basketList: HTMLElement;
+  protected basketButton: HTMLButtonElement;
+  protected basketPrice: HTMLElement;
 
-    constructor(container: HTMLElement, actions?: IBasketEvent) {
-        super(container);
+  constructor(protected events: IEvents, container: HTMLElement, protected basket: Basket) {
+    super(container);
 
-        this.basketTitle = ensureElement<HTMLElement>('.modal__title', this.container);
-        this.basketList = ensureElement<HTMLElement>('.basket__list', this.container);
-        this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
-        this.basketPrice = ensureElement<HTMLElement>('.basket__price', this.container);
+    this.basketTitle = ensureElement<HTMLElement>('.modal__title', container); // в шаблоне корзины заголовок .modal__title
+    this.basketList = ensureElement<HTMLElement>('.basket__list', container);
+    this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', container);
+    this.basketPrice = ensureElement<HTMLElement>('.basket__price', container);
 
-        if (actions?.onOrder) {
-            this.basketButton.addEventListener('click', actions.onOrder);
-        };
-    };
+    this.basketButton.addEventListener('click', () => this.events.emit('order:start'));
 
-    set items(value: HTMLElement[]) {
-        if (value.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'empty';
-            emptyMessage.textContent = 'Корзина пуста';
-            this.items = [emptyMessage];
-            this.buttonDisabled = true;
-            this.buttonText = 'Оформить';
-        } else {
-            this.basketList.replaceChildren(...value);
-            this.buttonDisabled = false;
-            this.buttonText = 'Оформить';
-        };
-    };
+    // Один раз навешиваем делегирование удаления
+    this.basketList.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.basket__item-delete');
+      if (!btn) return;
+      const li = (btn as HTMLElement).closest('.basket__item') as HTMLElement | null;
+      const id = li?.dataset.id;
+      if (id) this.events.emit('basket:remove', { id });
+    });
 
-    set buttonText(value: string) {
-        this.basketButton.textContent = String(value);
-    };
+    // Подписка на изменение корзины
+    this.events.on('basket:changed', () => this.render());
+  }
 
-    set buttonDisabled(value: boolean) {
-        this.basketButton.disabled = value;
-    };
+  private renderItems() {
+    const itemTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+    this.basketList.innerHTML = '';
 
-    set total(value: number) {
-        this.basketPrice.textContent = `${value} синапсов`;
-    };
-};
+    this.basket.getBasket().forEach((product, index) => {
+      const itemEl = itemTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      itemEl.dataset.id = product.id;
+
+      new BasketItem(this.events, itemEl, {
+        id: product.id,
+        title: product.title,
+        price: product.price || 0,
+        index: index + 1,
+      });
+
+      this.basketList.appendChild(itemEl);
+    });
+  }
+
+  render(): HTMLElement {
+    const items = this.basket.getBasket();
+    this.basketTitle.textContent = items.length
+      ? `Ваша корзина (${items.length})`
+      : 'Корзина пуста';
+    this.basketPrice.textContent = `${this.basket.getBasketTotal()} синапсов`;
+    this.renderItems();
+    return this.container;
+  }
+}

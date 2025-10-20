@@ -30,7 +30,7 @@ export interface IProduct {
 }
 
 export interface IOrderRequest extends IBuyer {
-  buyer: IBuyer;
+  buyer?: IBuyer;
   items: IProduct[];
   total: number;
 }
@@ -46,22 +46,5 @@ export interface IProductCatalogResult {
 }
 
 
-export interface ICardClick {
-    onClick?: (event: MouseEvent) => void;
-}
 
-export interface ICardBasketClick {
-    onRemove?: (event: MouseEvent) => void;
-}
 
-export interface IBasketEvent {
-    onOrder?: () => void;
-}
-
-export interface IFormEvent {
-    onSubmit?: (event: Event) => void;
-}
-
-export interface ISuccessEvent {
-    onClose?: () => void;
-}
