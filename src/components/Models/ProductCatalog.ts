@@ -1,8 +1,6 @@
-import type { IProduct } from '../../types/index';
-import type { IEvents } from '../base/Events';
-import  { AppEvents } from '../../utils/constants';
-
-
+import type { IProduct } from "../../types/index";
+import type { IEvents } from "../base/Events";
+import { AppEvents } from "../../utils/constants";
 
 export class ProductCatalog {
   private catalog: IProduct[] = [];
@@ -10,17 +8,17 @@ export class ProductCatalog {
 
   constructor(private events: IEvents) {}
 
-setCatalog(products: IProduct[]) {
-  this.catalog = products;
-  this.events.emit( AppEvents.CATALOG_UPDATED, { catalog: products });
-}
+  setCatalog(products: IProduct[]) {
+    this.catalog = products;
+    this.events.emit(AppEvents.CATALOG_UPDATED, { catalog: products });
+  }
 
   getCatalog(): IProduct[] {
     return this.catalog;
   }
 
   getProduct(id: string): IProduct | null {
-    return this.catalog.find(item => item.id === id) || null;
+    return this.catalog.find((item) => item.id === id) || null;
   }
 
   setCardProduct(item: IProduct): void {
@@ -32,6 +30,3 @@ setCatalog(products: IProduct[]) {
     return this.cardProduct;
   }
 }
-
-
-

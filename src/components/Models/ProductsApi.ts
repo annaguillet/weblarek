@@ -1,19 +1,21 @@
 import type { IApi, IProduct, IOrderRequest } from "../../types/index";
 
 export class ProductsApi {
-  constructor(private api: IApi) {}
+  private api: IApi;
+
+  constructor(api: IApi) {
+    this.api = api;
+  }
 
   /**
-   * Получение каталога
+   * Получение массива товаров с сервера
    */
   async fetchProducts(): Promise<IProduct[]> {
-    try {
-      const response = await this.api.get<{ items: IProduct[]; total: number }>('/product/');
-      return response.items;
-    } catch (error) {
-      console.error('❌ Ошибка при получении товаров:', error);
-      throw error;
-    }
+    // сервер возвращает { items: IProduct[], total: number }
+    const response = await this.api.get<{ items: IProduct[]; total: number }>(
+      "/product/"
+    );
+    return response.items;
   }
 
   /**

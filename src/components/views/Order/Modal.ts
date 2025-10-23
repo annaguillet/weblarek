@@ -1,6 +1,6 @@
-import { Component } from '../../base/Component';
-import { IEvents } from '../../base/Events';
-import { ensureElement } from '../../../utils/utils';
+import { Component } from "../../base/Component";
+import { IEvents } from "../../base/Events";
+import { ensureElement } from "../../../utils/utils";
 
 export class Modal extends Component<{ content: HTMLElement }> {
   protected containerElement: HTMLElement;
@@ -11,33 +11,36 @@ export class Modal extends Component<{ content: HTMLElement }> {
     super(container);
 
     this.containerElement = container;
-    this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', container);
-    this.contentElement = ensureElement<HTMLElement>('.modal__content', container);
+    this.closeButton = ensureElement<HTMLButtonElement>(
+      ".modal__close",
+      container
+    );
+    this.contentElement = ensureElement<HTMLElement>(
+      ".modal__content",
+      container
+    );
 
+    this.closeButton.addEventListener("click", () => this.hide());
 
-    this.closeButton.addEventListener('click', () => this.hide());
-
-
-    this.containerElement.addEventListener('click', (e) => {
+    this.containerElement.addEventListener("click", (e) => {
       if (e.target === this.containerElement) this.hide();
     });
 
-
-    this.containerElement.style.display = 'none';
-    this.containerElement.style.pointerEvents = 'none';
+    this.containerElement.style.display = "none";
+    this.containerElement.style.pointerEvents = "none";
   }
 
   show() {
-    this.containerElement.classList.add('modal_active');
-    this.containerElement.style.display = 'flex';
-    this.containerElement.style.pointerEvents = 'auto';
+    this.containerElement.classList.add("modal_active");
+    this.containerElement.style.display = "flex";
+    this.containerElement.style.pointerEvents = "auto";
   }
 
   hide() {
-    this.containerElement.classList.remove('modal_active');
-    this.containerElement.style.display = 'none';
-    this.containerElement.style.pointerEvents = 'none';
-    this.events.emit('modal:close');
+    this.containerElement.classList.remove("modal_active");
+    this.containerElement.style.display = "none";
+    this.containerElement.style.pointerEvents = "none";
+    this.events.emit("modal:close");
   }
 
   setContent(node: HTMLElement) {
@@ -52,7 +55,6 @@ export class Modal extends Component<{ content: HTMLElement }> {
   }
 
   get isVisible(): boolean {
-    return this.containerElement.classList.contains('modal_active');
+    return this.containerElement.classList.contains("modal_active");
   }
 }
-

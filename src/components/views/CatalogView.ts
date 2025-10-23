@@ -1,37 +1,41 @@
-import { Component } from '../base/Component';
+import { Component } from "../base/Component";
 import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
 import { IProduct } from "../../types/index";
-import { ProductCard } from './Card/CardGallery';
-import { categoryMap,AppEvents } from '../../utils/constants';
+import { ProductCard } from "./Card/CardGallery";
+import { categoryMap, AppEvents } from "../../utils/constants";
 
 interface IBasket {
   hasInBasket: (id: string) => boolean;
 }
 
-export class CatalogView extends Component<{}> { 
+export class CatalogView extends Component<{}> {
   protected list: HTMLElement;
 
   constructor(
-    private events: IEvents, 
+    private events: IEvents,
     container: HTMLElement,
     private basket: IBasket
   ) {
     super(container);
-    this.list = ensureElement<HTMLElement>('.gallery', this.container);
+    this.list = ensureElement<HTMLElement>(".gallery", this.container);
   }
 
   renderCatalog(products: IProduct[]) {
-    this.list.innerHTML = '';
+    this.list.innerHTML = "";
 
-    const template = document.querySelector<HTMLTemplateElement>('#card-catalog');
-    if (!template) throw new Error('Шаблон #card-catalog не найден');
+    const template =
+      document.querySelector<HTMLTemplateElement>("#card-catalog");
+    if (!template) throw new Error("Шаблон #card-catalog не найден");
 
-    products.forEach(product => {
-      const cardElement = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-      const categoryKey = product.category?.toLowerCase() as keyof typeof categoryMap | undefined;
+    products.forEach((product) => {
+      const cardElement = template.content.firstElementChild!.cloneNode(
+        true
+      ) as HTMLElement;
+      const categoryKey = product.category?.toLowerCase() as
+        | keyof typeof categoryMap
+        | undefined;
 
-      // Создаем экземпляр ProductCard - это правильно!
       new ProductCard(
         this.events,
         cardElement,
@@ -44,7 +48,8 @@ export class CatalogView extends Component<{}> {
           category: categoryKey,
         },
         {
-          onClick: () => this.events.emit(AppEvents.PRODUCT_SELECTED, { product }),
+          onClick: () =>
+            this.events.emit(AppEvents.PRODUCT_SELECTED, { product }),
         }
       );
 
