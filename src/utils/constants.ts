@@ -16,6 +16,35 @@ export const categoryMap = {
   'другое': 'card__category_other',
 };
 
+export enum AppEvents {
+  // каталог и товары
+  CATALOG_UPDATED = 'catalog:updated',
+  PRODUCT_CLICKED = 'product:clicked',
+  PRODUCT_SELECTED = 'product:selected',
+
+  // корзина
+  BASKET_ADD = 'basket:add',
+  BASKET_REMOVE = 'basket:remove',
+  BASKET_CHANGED = 'basket:changed',
+  BASKET_OPEN = 'basket:open',
+
+  // оформление
+  ORDER_START = 'order:start',
+  ORDER_NEXT = 'order:next',
+  ORDER_CONTACT_SUBMIT = 'order:contact-submit',
+  ORDER_SUCCESS = 'order:success',
+
+  // покупатель и формы
+  BUYER_CHANGE = 'buyer:change',
+  FORM_VALIDATE = 'form:validate',
+
+  // успех
+  SUCCESS_CLOSE = 'success:close',
+}
+
+
+
+
 export const settings = {
 
 };

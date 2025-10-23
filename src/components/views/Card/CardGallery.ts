@@ -1,7 +1,7 @@
 import { ensureElement } from '../../../utils/utils';
 import { Component } from '../../base/Component';
 import { IEvents } from '../../base/Events';
-import { categoryMap, CDN_URL } from '../../../utils/constants';
+import { categoryMap, CDN_URL, AppEvents } from '../../../utils/constants';
 
 
 
@@ -58,9 +58,9 @@ export class ProductCard extends Component<{}> {
     if (this.button) {
       this.button.addEventListener('click', () => {
         if (this._inBasket) {
-          this.events.emit('basket:remove', { id: this._id });
+          this.events.emit(AppEvents.BASKET_REMOVE, { id: this._id });
         } else {
-          this.events.emit('basket:add', { id: this._id });
+          this.events.emit( AppEvents.BASKET_ADD, { id: this._id });
         }
         this._inBasket = !this._inBasket;
         this.inBasket = this._inBasket;

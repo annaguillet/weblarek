@@ -1,5 +1,6 @@
 import { Component } from '../../base/Component';
-import { ensureElement } from '../../../utils/utils';
+import { ensureElement} from '../../../utils/utils';
+import { AppEvents} from '../../../utils/constants';
 
 interface ISuccessData {
   total: number;
@@ -8,6 +9,7 @@ interface ISuccessData {
 export class Success extends Component<ISuccessData> {
   protected description: HTMLElement;
   protected closeButton: HTMLButtonElement;
+  private total: number = 0; // добавим локально
 
   constructor(container: HTMLElement, private events?: any) {
     super(container);
@@ -16,11 +18,22 @@ export class Success extends Component<ISuccessData> {
     this.closeButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
 
     this.closeButton.addEventListener('click', () => {
-      this.events?.emit('success:close');
+      this.events?.emit(AppEvents.SUCCESS_CLOSE);
     });
   }
 
-  set total(value: number) {
-    this.description.textContent = `Списано ${value} синапсов`;
+  // новый сеттер для total
+  setTotal(total: number) {
+    this.total = total;
+    this.description.textContent = `Списано ${total} синапсов`;
+  }
+
+  render(): HTMLElement {
+    // при рендере подставляем текст
+    this.description.textContent = `Списано ${this.total} синапсов`;
+    return this.container;
   }
 }
+
+
+

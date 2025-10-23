@@ -1,6 +1,7 @@
 import { FormBase } from './FormBase';
 import { IEvents } from '../../base/Events';
-import { ensureElement } from '../../../utils/utils';
+import { ensureElement} from '../../../utils/utils';
+import { AppEvents} from '../../../utils/constants';
 
 export class ContactForm extends FormBase<{ email: string; phone: string }> {
   protected emailInput: HTMLInputElement;
@@ -15,18 +16,29 @@ export class ContactForm extends FormBase<{ email: string; phone: string }> {
     [this.emailInput, this.phoneInput].forEach(input => {
       input.addEventListener('input', () => {
         this.submitButton.disabled = !this.validate();
+        // ⬇️ можно также обновлять модель покупателя:
+        this.events.emit(AppEvents.BUYER_CHANGE, { key: input.name, value: input.value });
       });
     });
 
     this.container.addEventListener('submit', (e) => {
       e.preventDefault();
       if (this.validate()) {
-        this.events.emit('order:submit', { email: this.emailInput.value, phone: this.phoneInput.value });
+        const data = {
+          email: this.emailInput.value,
+          phone: this.phoneInput.value,
+        };
+        this.events.emit(AppEvents.ORDER_CONTACT_SUBMIT, data);
+      } else {
       }
     });
   }
+  
 
   validate(): boolean {
     return this.emailInput.value.trim() !== '' && this.phoneInput.value.trim() !== '';
   }
 }
+
+
+

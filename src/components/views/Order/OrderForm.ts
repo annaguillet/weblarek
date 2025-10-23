@@ -1,6 +1,7 @@
 import { FormBase } from './FormBase';
 import { IEvents } from '../../base/Events';
-import { ensureElement } from '../../../utils/utils';
+import { ensureElement} from '../../../utils/utils';
+import { AppEvents} from '../../../utils/constants';
 
 export class OrderForm extends FormBase<{ payment: string; address: string }> {
   protected paymentButtons: NodeListOf<HTMLButtonElement>;
@@ -20,14 +21,14 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
         btn.classList.add('button_alt-active');
     
 
-        this.events.emit('order:change', { payment: this.selectedPayment });
+        this.events.emit(AppEvents.BUYER_CHANGE, { payment: this.selectedPayment });
     
         this.submitButton.disabled = !this.validate();
       });
     });
     
     this.addressInput.addEventListener('input', () => {
-      this.events.emit('order:change', { address: this.addressInput.value });
+      this.events.emit(AppEvents.BUYER_CHANGE, { address: this.addressInput.value });
     
       this.submitButton.disabled = !this.validate();
     });
@@ -41,7 +42,7 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
       e.preventDefault();
       if (this.validate()) {
 
-        this.events.emit('order:next', { 
+        this.events.emit(AppEvents.ORDER_NEXT, { 
           payment: this.selectedPayment, 
           address: this.addressInput.value
         });

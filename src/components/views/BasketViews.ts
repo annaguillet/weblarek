@@ -1,65 +1,50 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
-import { BasketItem } from './Card/BasketItem';
-import { Basket } from '../Models/Basket';
+import { ensureElement} from '../../utils/utils';
+import {AppEvents} from '../../utils/constants';
 
+export interface IBasketViewItemElement extends HTMLElement {}
 
-export class BasketView extends Component<{ basket: Basket }> {
+export class BasketView extends Component<{}> {
   protected basketTitle: HTMLElement;
   protected basketList: HTMLElement;
   protected basketButton: HTMLButtonElement;
   protected basketPrice: HTMLElement;
 
-  constructor(protected events: IEvents, container: HTMLElement, protected basket: Basket) {
+  // локально храним элементы списка, если нужно
+  protected _items: IBasketViewItemElement[] = [];
+
+  constructor(protected events: IEvents, container: HTMLElement) {
     super(container);
 
-    this.basketTitle = ensureElement<HTMLElement>('.modal__title', container); 
+    this.basketTitle = ensureElement<HTMLElement>('.modal__title', container);
     this.basketList = ensureElement<HTMLElement>('.basket__list', container);
     this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', container);
     this.basketPrice = ensureElement<HTMLElement>('.basket__price', container);
 
-    this.basketButton.addEventListener('click', () => this.events.emit('order:start'));
-
-
-    this.basketList.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest('.basket__item-delete');
-      if (!btn) return;
-      const li = (btn as HTMLElement).closest('.basket__item') as HTMLElement | null;
-      const id = li?.dataset.id;
-      if (id) this.events.emit('basket:remove', { id });
-    });
-
-
-    this.events.on('basket:changed', () => this.render());
+    // Кнопка выполнения заказа — вызывает событие, которое должен обрабатывать презентер.
+    this.basketButton.addEventListener('click', () => this.events.emit(AppEvents.ORDER_START));
   }
 
-  private renderItems() {
-    const itemTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
-    this.basketList.innerHTML = '';
-
-    this.basket.getBasket().forEach((product, index) => {
-      const itemEl = itemTemplate.content.firstElementChild!.cloneNode(true) as HTMLElement;
-      itemEl.dataset.id = product.id;
-
-      new BasketItem(this.events, itemEl, {
-        id: product.id,
-        title: product.title,
-        price: product.price || 0,
-        index: index + 1,
-      });
-
-      this.basketList.appendChild(itemEl);
-    });
+  // Сеттер, который презентер будет вызывать с готовыми DOM-элементами (элементами BasketItem)
+  set items(items: IBasketViewItemElement[]) {
+    this._items = items;
+    // в DOM подставляем уже готовые элементы
+    this.basketList.replaceChildren(...items);
   }
 
+  // Сеттер для заголовка (кол-во позиций)
+  set count(value: number) {
+    this.basketTitle.textContent = value ? `Ваша корзина (${value})` : 'Корзина пуста';
+  }
+
+  // Сеттер для отображения цены
+  set priceText(text: string) {
+    this.basketPrice.textContent = text;
+  }
+
+  // render должен только вернуть контейнер; отрисовкой списка управляет презентер через сеттеры выше
   render(): HTMLElement {
-    const items = this.basket.getBasket();
-    this.basketTitle.textContent = items.length
-      ? `Ваша корзина (${items.length})`
-      : 'Корзина пуста';
-    this.basketPrice.textContent = `${this.basket.getBasketTotal()} синапсов`;
-    this.renderItems();
     return this.container;
   }
 }

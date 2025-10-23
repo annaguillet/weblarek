@@ -1,6 +1,7 @@
 import { ensureElement } from '../../../utils/utils';
 import { Component } from '../../base/Component';
 import { IEvents } from '../../base/Events';
+import { AppEvents } from '../../../utils/constants';
 
 export interface IBasketItemData {
   id: string;
@@ -41,7 +42,7 @@ export class BasketItem extends Component<{}> {
 
     // Обработчик удаления
     this.removeButton.addEventListener('click', () => {
-      this.events.emit('basket:remove', { id: this._id });
+      this.events.emit(AppEvents.BASKET_REMOVE, { id: this._id });
     });
   }
 

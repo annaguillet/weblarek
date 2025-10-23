@@ -3,7 +3,7 @@ import { ensureElement } from "../../utils/utils";
 import { IEvents } from "../base/Events";
 import { IProduct } from "../../types/index";
 import { ProductCard } from './Card/CardGallery';
-import { categoryMap } from '../../utils/constants';
+import { categoryMap,AppEvents } from '../../utils/constants';
 
 interface IBasket {
   hasInBasket: (id: string) => boolean;
@@ -44,7 +44,7 @@ export class CatalogView extends Component<{}> {
           category: categoryKey,
         },
         {
-          onClick: () => this.events.emit('product:selected', { product }),
+          onClick: () => this.events.emit(AppEvents.PRODUCT_SELECTED, { product }),
         }
       );
 
