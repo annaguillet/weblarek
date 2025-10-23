@@ -35,15 +35,9 @@ export interface IOrderRequest extends IBuyer {
   total: number;
 }
 
-export interface IOrderResult {
-    id: string;
-    total: number;
-}
 
-export interface IProductCatalogResult {
-    total: number;
-    items: IProduct[];
-}
+
+
 
 
 
