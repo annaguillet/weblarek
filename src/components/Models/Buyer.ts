@@ -16,7 +16,6 @@ export class Buyer {
     if (data.email !== undefined) this.email = data.email;
     if (data.phone !== undefined) this.phone = data.phone;
 
-    // Только валидируем и сообщаем обновление
     const errors = this.validateBuyerData();
     this.events.emit(AppEvents.FORM_VALIDATE, errors);
     this.events.emit("buyer:updated", { buyer: this.getBuyerData() });

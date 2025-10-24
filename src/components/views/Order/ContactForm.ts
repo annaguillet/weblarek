@@ -3,6 +3,11 @@ import { IEvents } from "../../base/Events";
 import { ensureElement } from "../../../utils/utils";
 import { AppEvents } from "../../../utils/constants";
 
+/**
+ * Форма ввода контактных данных покупателя.
+ * Не выполняет валидацию — только сообщает о вводе данных
+ * и реагирует на результаты проверки из модели Buyer.
+ */
 export class ContactForm extends FormBase<{ email: string; phone: string }> {
   protected emailInput: HTMLInputElement;
   protected phoneInput: HTMLInputElement;
@@ -19,33 +24,13 @@ export class ContactForm extends FormBase<{ email: string; phone: string }> {
       container
     );
 
-    [this.emailInput, this.phoneInput].forEach((input) => {
-      input.addEventListener("input", () => {
-        this.submitButton.disabled = !this.validate();
-
-        this.events.emit(AppEvents.BUYER_CHANGE, {
-          key: input.name,
-          value: input.value,
-        });
-      });
-    });
-
     this.container.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (this.validate()) {
-        const data = {
-          email: this.emailInput.value,
-          phone: this.phoneInput.value,
-        };
-        this.events.emit(AppEvents.ORDER_CONTACT_SUBMIT, data);
-      } else {
-      }
+      this.events.emit(AppEvents.ORDER_CONTACT_SUBMIT, {
+        email: this.emailInput.value,
+        phone: this.phoneInput.value,
+      });
     });
   }
 
-  validate(): boolean {
-    return (
-      this.emailInput.value.trim() !== "" && this.phoneInput.value.trim() !== ""
-    );
-  }
 }

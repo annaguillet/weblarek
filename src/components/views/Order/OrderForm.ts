@@ -31,8 +31,6 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
           key: "payment",
           value: this.selectedPayment,
         });
-
-        this.submitButton.disabled = !this.validate();
       });
     });
 
@@ -41,21 +39,14 @@ export class OrderForm extends FormBase<{ payment: string; address: string }> {
         key: "address",
         value: this.addressInput.value,
       });
-      this.submitButton.disabled = !this.validate();
     });
 
     this.container.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (this.validate()) {
-        this.events.emit(AppEvents.ORDER_NEXT, {
-          payment: this.selectedPayment,
-          address: this.addressInput.value,
-        });
-      }
+      this.events.emit(AppEvents.ORDER_NEXT, {
+        payment: this.selectedPayment,
+        address: this.addressInput.value,
+      });
     });
-  }
-
-  validate(): boolean {
-    return !!this.selectedPayment && this.addressInput.value.trim() !== "";
   }
 }

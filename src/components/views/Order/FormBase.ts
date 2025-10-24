@@ -16,9 +16,9 @@ export abstract class FormBase<T> extends Component<T> {
     );
     this.errorElement = ensureElement<HTMLElement>(".form__errors", container);
 
-    this.events.on(
+    this.events.on<Record<string, string>>(
       AppEvents.FORM_VALIDATE,
-      (errors: Record<string, string>) => {
+      (errors) => {
         this.updateErrors(errors);
       }
     );
@@ -26,6 +26,7 @@ export abstract class FormBase<T> extends Component<T> {
     this.container.addEventListener("input", (e) => {
       const target = e.target as HTMLInputElement;
       if (!target?.name) return;
+
       this.events.emit(AppEvents.BUYER_CHANGE, {
         key: target.name,
         value: target.value,
@@ -36,23 +37,21 @@ export abstract class FormBase<T> extends Component<T> {
   protected updateErrors(errors: Record<string, string>) {
     this.container
       .querySelectorAll<HTMLInputElement>("[name]")
-      .forEach((field) => {
-        field.setCustomValidity("");
-      });
+      .forEach((field) => field.setCustomValidity(""));
 
     let hasErrors = false;
+
     Object.entries(errors).forEach(([key, message]) => {
       const field = this.container.querySelector<HTMLInputElement>(
         `[name="${key}"]`
       );
-      if (field) {
-        field.setCustomValidity(message || "");
-        if (message) hasErrors = true;
+      if (field && message) {
+        field.setCustomValidity(message);
+        hasErrors = true;
       }
     });
 
     this.submitButton.disabled = hasErrors;
-
     this.errorElement.textContent = hasErrors ? "Исправьте ошибки в форме" : "";
   }
 
@@ -64,5 +63,4 @@ export abstract class FormBase<T> extends Component<T> {
     this.errorElement.textContent = "";
   }
 
-  abstract validate(): boolean;
 }
