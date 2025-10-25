@@ -178,6 +178,12 @@ events.on<{ key: keyof IBuyer; value: string }>(AppEvents.BUYER_CHANGE, ({ key, 
   buyer.setBuyerData({ [key]: value });
 });
 
+// Слушаем результат валидации из модели Buyer
+events.on<Record<string, string>>(AppEvents.FORM_VALIDATE, (errors) => {
+  orderForm.updateErrors(errors);
+  contactForm.updateErrors(errors);
+});
+
 // ==========================================================
 // 6. ЗАКРЫТИЕ ОКНА УСПЕХА
 // ==========================================================

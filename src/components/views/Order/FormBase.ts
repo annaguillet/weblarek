@@ -10,41 +10,23 @@ export abstract class FormBase<T> extends Component<T> {
   constructor(protected events: IEvents, container: HTMLElement) {
     super(container);
 
-    this.submitButton = ensureElement<HTMLButtonElement>(
-      'button[type="submit"]',
-      container
-    );
-    this.errorElement = ensureElement<HTMLElement>(".form__errors", container);
+    this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', container);
+    this.errorElement = ensureElement<HTMLElement>('.form__errors', container);
 
-    this.events.on<Record<string, string>>(
-      AppEvents.FORM_VALIDATE,
-      (errors) => {
-        this.updateErrors(errors);
-      }
-    );
-
-    this.container.addEventListener("input", (e) => {
+    this.container.addEventListener('input', (e) => {
       const target = e.target as HTMLInputElement;
       if (!target?.name) return;
-
-      this.events.emit(AppEvents.BUYER_CHANGE, {
-        key: target.name,
-        value: target.value,
-      });
+      this.events.emit(AppEvents.BUYER_CHANGE, { key: target.name, value: target.value });
     });
   }
 
-  protected updateErrors(errors: Record<string, string>) {
-    this.container
-      .querySelectorAll<HTMLInputElement>("[name]")
-      .forEach((field) => field.setCustomValidity(""));
+  public updateErrors(errors: Record<string, string>) {
+    this.container.querySelectorAll<HTMLInputElement>('[name]').forEach((field) => field.setCustomValidity(''));
 
     let hasErrors = false;
 
     Object.entries(errors).forEach(([key, message]) => {
-      const field = this.container.querySelector<HTMLInputElement>(
-        `[name="${key}"]`
-      );
+      const field = this.container.querySelector<HTMLInputElement>(`[name="${key}"]`);
       if (field && message) {
         field.setCustomValidity(message);
         hasErrors = true;
@@ -52,15 +34,6 @@ export abstract class FormBase<T> extends Component<T> {
     });
 
     this.submitButton.disabled = hasErrors;
-    this.errorElement.textContent = hasErrors ? "Исправьте ошибки в форме" : "";
+    this.errorElement.textContent = hasErrors ? 'Исправьте ошибки в форме' : '';
   }
-
-  showError(message: string) {
-    this.errorElement.textContent = message;
-  }
-
-  clearError() {
-    this.errorElement.textContent = "";
-  }
-
 }
